@@ -129,6 +129,7 @@
 		};
 	};
 
+/*
 	sound {
 		compatible = "fsl,imx6ul-evk-wm8960",
 			   "fsl,imx-audio-wm8960";
@@ -138,12 +139,14 @@
 		asrc-controller = <&asrc>;
 		codec-master;
 		gpr = <&gpr>;
-		/*
-                 * hp-det = <hp-det-pin hp-det-polarity>;
+*/
+    /*
+     * hp-det = <hp-det-pin hp-det-polarity>;
 		 * hp-det-pin: JD1 JD2  or JD3
 		 * hp-det-polarity = 0: hp detect high for headphone
 		 * hp-det-polarity = 1: hp detect high for speaker
 		 */
+/*
 		hp-det = <3 0>;
 		hp-det-gpios = <&gpio5 4 0>;
 		mic-det-gpios = <&gpio5 4 0>;
@@ -165,6 +168,7 @@
 			"ASRC-Capture", "CPU-Capture",
 			"CPU-Capture", "Capture";
 	};
+*/
 
 	spi4 {
 		compatible = "spi-gpio";
@@ -202,6 +206,7 @@
 	assigned-clock-rates = <786432000>;
 };
 
+/*
 &csi {
 	status = "disabled";
 
@@ -211,6 +216,7 @@
 		};
 	};
 };
+*/
 
 /*
 &fec1 {
