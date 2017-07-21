@@ -1,88 +1,121 @@
 /*
- * PLACEHOLDER
+ * Texas Instruments SI7050 SMBus temperature sensor driver
+ * Copyright (C) 2014 Heiko Schocher <hs@denx.de>
+ *
+ * Based on:
+ * Texas Instruments TMP102 SMBus temperature sensor driver
+ *
+ * Copyright (C) 2010 Steven King <sfking@fdwdc.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
  */
 
-#include <linux/i2c.h>
-#include <linux/bcd.h>
-#include <linux/rtc.h>
 #include <linux/module.h>
+#include <linux/init.h>
+#include <linux/slab.h>
+#include <linux/i2c.h>
+#include <linux/hwmon.h>
+#include <linux/hwmon-sysfs.h>
+#include <linux/err.h>
+#include <linux/mutex.h>
+#include <linux/device.h>
+#include <linux/jiffies.h>
+#include <linux/regmap.h>
 
-#define DRV_VERSION "0.0.1"
+#define SI7050_TEMP_REG    0x00
+#define SI7050_CONF_REG    0x01
+#define SI7050_TLOW_REG    0x02
+#define SI7050_THIGH_REG   0x03
 
-#define SI7050_REG_TEMP      0xE3 /* Temperature, Hold Mode */
+#define SI7050_CONF_M0     0x01
+#define SI7050_CONF_M1     0x02
+#define SI7050_CONF_LC     0x04
+#define SI7050_CONF_FL     0x08
+#define SI7050_CONF_FH     0x10
+#define SI7050_CONF_CR0    0x20
+#define SI7050_CONF_CR1    0x40
+#define SI7050_CONF_ID     0x80
+#define SI7050_CONF_SD    (SI7050_CONF_M1)
+#define SI7050_CONF_SD_MASK  (SI7050_CONF_M0 | SI7050_CONF_M1)
 
-static struct i2c_driver si7050_driver;
+#define SI7050_CONFIG    (SI7050_CONF_CR1 | SI7050_CONF_M1)
+#define SI7050_CONFIG_MASK  (SI7050_CONF_CR0 | SI7050_CONF_CR1 | \
+         SI7050_CONF_M0 | SI7050_CONF_M1)
 
-struct si7050 {
-  struct rtc_device *rtc;
-  int c_polarity;  /* 0: MO_C=1 means 19xx, otherwise MO_C=1 means 20xx */
-  int voltage_low; /* indicates if a low_voltage was detected */
+static inline int si7050_reg_to_mc(s8 val)
+{
+  return val * 1000;
+}
+
+static ssize_t si7050_show_temp(struct device *dev, struct device_attribute *attr, char *buf)
+{
+  struct sensor_device_attribute *sda = to_sensor_dev_attr(attr);
+  struct regmap *regmap = dev_get_drvdata(dev);
+  unsigned int regval;
+  int ret;
+
+  ret = regmap_read(regmap, sda->index, &regval);
+  if (ret < 0)
+    return ret;
+
+  return sprintf(buf, "17\n");
+}
+
+static SENSOR_DEVICE_ATTR(temp1_input, S_IRUGO, si7050_show_temp, NULL, SI7050_TEMP_REG);
+
+static struct attribute *si7050_attrs[] = {
+  &sensor_dev_attr_temp1_input.dev_attr.attr,
+  NULL
 };
 
+ATTRIBUTE_GROUPS(si7050);
 
-static int si7050_get_datetime(struct i2c_client *client, char *aTemp)
+static bool si7050_regmap_is_volatile(struct device *dev, unsigned int reg)
 {
-  struct si7050 *si7050 = i2c_get_clientdata(client);
-  unsigned char buf[4] = { SI7050_REG_TEMP };
-  struct i2c_msg msgs[] = {
-    {/* setup read ptr */
-      .addr = client->addr,
-      .len = 1,
-      .buf = buf
-    },
-    {/* read temperature */
-      .addr = client->addr,
-      .flags = I2C_M_RD,
-      .len = 2,
-      .buf = buf
-    },
-  };
-
-  /* read registers */
-  if ((i2c_transfer(client->adapter, msgs, 2)) != 2) {
-    dev_err(&client->dev, "%s: read error\n", __func__);
-    return -EIO;
-  }
-
-  &aTemp = buf[1];
-
-  return 0;
+  return reg == SI7050_TEMP_REG;
 }
 
-static int si7050_read_temp(struct device *dev, char *aTemp)
-{
-  return si7050_get_datetime(to_i2c_client(dev), tm);
-}
-
-static const struct rtc_class_ops si7050_rtc_ops = {
-  .read_time  = si7050_read_temp,
-  .set_time  = si7050_rtc_set_time
+static const struct regmap_config si7050_regmap_config = {
+  .reg_bits = 8,
+  .val_bits = 8,
+  .max_register = SI7050_THIGH_REG,
+  .volatile_reg = si7050_regmap_is_volatile,
 };
 
 static int si7050_probe(struct i2c_client *client,
-        const struct i2c_device_id *id)
+      const struct i2c_device_id *id)
 {
-  struct si7050 *si7050;
+  struct device *dev = &client->dev;
+  struct device *hwmon_dev;
+  struct regmap *regmap;
+  int ret;
 
-  dev_dbg(&client->dev, "%s\n", __func__);
+  regmap = devm_regmap_init_i2c(client, &si7050_regmap_config);
+  if (IS_ERR(regmap)) {
+    dev_err(dev, "failed to allocate register map\n");
+    return PTR_ERR(regmap);
+  }
 
-  if (!i2c_check_functionality(client->adapter, I2C_FUNC_I2C))
-    return -ENODEV;
+  ret = regmap_update_bits(regmap, SI7050_CONF_REG, SI7050_CONFIG_MASK,
+         SI7050_CONFIG);
+  if (ret < 0) {
+    dev_err(&client->dev, "error writing config register\n");
+    return ret;
+  }
 
-  si7050 = devm_kzalloc(&client->dev, sizeof(struct si7050),
-        GFP_KERNEL);
-  if (!si7050)
-    return -ENOMEM;
-
-  dev_info(&client->dev, "chip found, driver version " DRV_VERSION "\n");
-
-  i2c_set_clientdata(client, si7050);
-
-  si7050->rtc = devm_rtc_device_register(&client->dev,
-        si7050_driver.driver.name,
-        &si7050_rtc_ops, THIS_MODULE);
-
-  return PTR_ERR_OR_ZERO(si7050->rtc);
+  i2c_set_clientdata(client, regmap);
+  hwmon_dev = devm_hwmon_device_register_with_groups(dev, client->name,
+                  regmap, si7050_groups);
+  return PTR_ERR_OR_ZERO(hwmon_dev);
 }
 
 static const struct i2c_device_id si7050_id[] = {
@@ -91,19 +124,9 @@ static const struct i2c_device_id si7050_id[] = {
 };
 MODULE_DEVICE_TABLE(i2c, si7050_id);
 
-#ifdef CONFIG_OF
-  static const struct of_device_id si7050_of_match[] = {
-    { .compatible = "si,si7050" },
-    {}
-  };
-  MODULE_DEVICE_TABLE(of, si7050_of_match);
-#endif
-
 static struct i2c_driver si7050_driver = {
-  .driver    = {
+  .driver = {
     .name  = "si7050",
-    .owner  = THIS_MODULE,
-    .of_match_table = of_match_ptr(si7050_of_match),
   },
   .probe    = si7050_probe,
   .id_table  = si7050_id,
@@ -111,7 +134,6 @@ static struct i2c_driver si7050_driver = {
 
 module_i2c_driver(si7050_driver);
 
-MODULE_AUTHOR("DBJ");
-MODULE_DESCRIPTION("SI7050 Temperature Sensor Driver");
+MODULE_AUTHOR("Daniel Bujak <danb@swiftlabs.com>");
+MODULE_DESCRIPTION("Silicon Labs SI7050 temperature sensor driver");
 MODULE_LICENSE("GPL");
-MODULE_VERSION(DRV_VERSION);

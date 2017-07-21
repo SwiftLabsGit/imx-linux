@@ -1482,6 +1482,17 @@ config SENSORS_TMP102
 	  This driver can also be built as a module.  If so, the module
 	  will be called tmp102.
 
+config SENSORS_SI7050
+  tristate "Silicone Labs SI7050"
+  depends on I2C
+  select REGMAP_I2C
+  help
+    If you say yes here you get support for Silicone Labs SI7050
+    sensor chips.
+
+    This driver can also be built as a module.  If so, the module
+    will be called si7050.
+
 config SENSORS_TMP103
 	tristate "Texas Instruments TMP103"
 	depends on I2C
