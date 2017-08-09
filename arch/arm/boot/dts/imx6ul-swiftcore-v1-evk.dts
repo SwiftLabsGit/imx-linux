@@ -217,7 +217,7 @@
 	    wlan_pins_default: pinmux_wlan_pins_default {
 		pinctrl-single,pins = <
 			MX6UL_PAD_NAND_ALE__GPIO4_IO10              (PIN_INPUT | MUX_MODE7)	/* bt_en */
-			MX6UL_PAD_ENET1_TX_DATA1__GPIO2_IO04        (PIN_OUTPUT_PULLDOWN | MUX_MODE7)		/* wlan_iqr */
+			/*MX6UL_PAD_ENET1_TX_DATA1__GPIO2_IO04        (PIN_OUTPUT_PULLDOWN | MUX_MODE7)		/* wlan_iqr */
 			MX6UL_PAD_NAND_DATA07__GPIO4_IO09           (PIN_OUTPUT_PULLDOWN | MUX_MODE7)	/* wlan_en*/
 		    >;
 	    };
@@ -225,7 +225,7 @@
 	    wlan_pins_sleep: pinmux_wlan_pins_sleep {
 		pinctrl-single,pins = <
 			MX6UL_PAD_NAND_ALE__GPIO4_IO10                 (PIN_INPUT | MUX_MODE7)	    /* bt_en */
-			MX6UL_PAD_ENET1_TX_DATA1__GPIO2_IO04           (PIN_OUTPUT_PULLDOWN | MUX_MODE7)		/* wlan_iqr */
+			/*MX6UL_PAD_ENET1_TX_DATA1__GPIO2_IO04           (PIN_OUTPUT_PULLDOWN | MUX_MODE7)		/* wlan_iqr */
 			MX6UL_PAD_NAND_DATA07__GPIO4_IO09              (PIN_OUTPUT_PULLDOWN | MUX_MODE7)	/* wlan_en */
 		    >;
 	    };
