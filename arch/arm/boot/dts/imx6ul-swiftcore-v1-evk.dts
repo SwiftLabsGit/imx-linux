@@ -168,7 +168,7 @@
     };
 	
 };
-                                                               /*SPI4*/
+                                                               /*SPI4*//*
 &ecspi4 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_ecspi4>;
@@ -322,6 +322,12 @@
     pinctrl-0 = <&pinctrl_uart7>;
     status = "okay";
 };
+                                                               /*Cellular on UART8*/
+&uart8 {
+    pinctrl-names = "default";
+    pinctrl-0 = <&pinctrl_uart8>;
+    status = "okay";
+};
                                                                /*Cellular on USBOTG1*/
 &usbotg1 {
     dr_mode = "host";
@@ -355,11 +361,31 @@
       interrupt-parent = <&gpio2>;
       interrupts = <4 0x1>; 
     };
+};
+                                                               /*sdcard on mmc1*/
+&usdhc2 {
+    status = "okay";
+    bus-width = <4>;
+	pinctrl-names = "default", "sleep";
+	pinctrl-0 = <&pinctrl_usdhc2>;
 };  
   
 &iomuxc {
   pinctrl-names = "default";
   imx6ul-evk {
+	                                                           /*SDcard on USDHC2*/
+  	pinctrl_usdhc2: 
+    usdhc2grp {
+    	fsl,pins = <
+    	  MX6UL_PAD_CSI_DATA01__USDHC2_DATA1         0x000010B0
+		  MX6UL_PAD_NAND_DATA00__USDHC2_DATA0        0x000010B0
+		  MX6UL_PAD_NAND_DATA02__USDHC2_DATA2        0x000010B0
+          MX6UL_PAD_NAND_DATA03__USDHC2_DATA3        0x000010B0
+		  MX6UL_PAD_NAND_RE_B__USDHC2_CLK            0x000010B0
+          MX6UL_PAD_NAND_WE_B__USDHC2_CMD            0x000010B0
+		  
+    	>;
+  	};
                                                                /*wilink mmc0 pins, normal mode*/
   	usdhc1_pins_default: 
     pinmux_usdhc1_pins_default {
@@ -563,6 +589,14 @@
       fsl,pins = <
         MX6UL_PAD_ENET2_RX_EN__UART7_DCE_TX        0x000010B0
         MX6UL_PAD_ENET2_TX_DATA0__UART7_DCE_RX     0x000010B0
+      >;
+    };
+	                                                           /*GNSS UART7 pins  1*/
+    pinctrl_uart8:
+    uart8grp {
+      fsl,pins = <
+        MX6UL_PAD_ENET2_TX_DATA1__UART8_DTE_RX     0x000010B0
+        MX6UL_PAD_ENET2_TX_EN__UART8_DTE_TX        0x000010B0
       >;
     };
 	                                                           /*JTAG pins  1*/
