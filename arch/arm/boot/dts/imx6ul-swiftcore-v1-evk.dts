@@ -289,63 +289,63 @@
 
 /*Digital Audio on SAI1*/
 &sai1 {
-    pinctrl-names = "default";
-    pinctrl-0 = <&pinctrl_sai1>;
-    assigned-clocks = <&clks IMX6UL_CLK_SAI1_SEL>,
-    <&clks IMX6UL_CLK_SAI1>;
-    assigned-clock-parents = <&clks IMX6UL_CLK_PLL4_AUDIO_DIV>;
-    assigned-clock-rates = <0>, <12288000>;
-    status = "okay";
+  pinctrl-names = "default";
+  pinctrl-0 = <&pinctrl_sai1>;
+  assigned-clocks = <&clks IMX6UL_CLK_SAI1_SEL>,
+  <&clks IMX6UL_CLK_SAI1>;
+  assigned-clock-parents = <&clks IMX6UL_CLK_PLL4_AUDIO_DIV>;
+  assigned-clock-rates = <0>, <12288000>;
+  status = "okay";
 };
 
 /*USB Debug on UART2*/
 &uart2 {
-    pinctrl-names = "default";
-    pinctrl-0 = <&pinctrl_uart2>;
-    status = "okay";
+  pinctrl-names = "default";
+  pinctrl-0 = <&pinctrl_uart2>;
+  status = "okay";
 };
 
 /*BTWilink on UART3*/
 &uart3 {
-    pinctrl-names = "default";
-    pinctrl-0 = <&pinctrl_uart3>;
+  pinctrl-names = "default";
+  pinctrl-0 = <&pinctrl_uart3>;
   fsl,uart-has-rtscts; 
-    status = "okay";
+  status = "okay";
 };
 
 /*LORA on UART4*/
 &uart4 {
-    pinctrl-names = "default";
-    pinctrl-0 = <&pinctrl_uart4>;
-    status = "okay";
+  pinctrl-names = "default";
+  pinctrl-0 = <&pinctrl_uart4>;
+  status = "okay";
 };
 
 /*Sub-1GHZ on UART5*/
 &uart5 {
-    pinctrl-names = "default";
-    pinctrl-0 = <&pinctrl_uart5>;
-    status = "okay";
+  pinctrl-names = "default";
+  pinctrl-0 = <&pinctrl_uart5>;
+  status = "okay";
 };
 
 /*GNSS on UART7*/
 &uart7 {
-    pinctrl-names = "default";
-    pinctrl-0 = <&pinctrl_uart7>;
-    status = "okay";
+  pinctrl-names = "default";
+  pinctrl-0 = <&pinctrl_uart7>;
+  status = "okay";
 };
 
 /*Cellular on USBOTG1*/
 &usbotg1 {
-    dr_mode = "host";
-    status = "okay";
+  dr_mode = "host";
+  status = "okay";
 };
 
 /*USB port on USBOTG2*/
 &usbotg2 {
-    dr_mode = "host";
-    disable-over-current;
+  dr_mode = "host";
+  disable-over-current;
   pinctrl-0 = <&pinctrl_usbotg2>;
-    status = "okay";
+  status = "okay";
 };
 
 /*sdcard on mmc1*/
@@ -593,11 +593,11 @@
 
     /* LORA UART4 pins */
     pinctrl_uart4:
-      uart4grp {
-        fsl,pins = <
-          MX6UL_PAD_UART4_RX_DATA__UART4_DCE_RX  0x000010B0
-          MX6UL_PAD_UART4_TX_DATA__UART4_DCE_TX  0x000010B0
-        >;
+    uart4grp {
+      fsl,pins = <
+        MX6UL_PAD_UART4_RX_DATA__UART4_DCE_RX    0x000010B0
+        MX6UL_PAD_UART4_TX_DATA__UART4_DCE_TX    0x000010B0
+      >;
     };
 
     /* Sub-1GHz UART5 pins */
@@ -618,12 +618,12 @@
       >;
     };
 
-    /* GNSS UART7 pins */
+    /* CELL UART8 pins */
     pinctrl_uart8:
     uart8grp {
       fsl,pins = <
-        MX6UL_PAD_ENET2_TX_DATA1__UART8_DTE_RX   0x000010B0
-        MX6UL_PAD_ENET2_TX_EN__UART8_DTE_TX      0x000010B0
+        MX6UL_PAD_ENET2_TX_DATA1__UART8_DCE_TX   0x000010B0
+        MX6UL_PAD_ENET2_TX_EN__UART8_DCE_RX      0x000010B0
       >;
     };
 
