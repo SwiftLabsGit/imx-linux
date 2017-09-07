@@ -40,9 +40,9 @@
     };
 
     wifi_led {
-      label = "Wifi-Access";
+      label = "Heartbeat-Cell";
       gpios = <&gpio2 05 0>;
-      linux,default-trigger = "mmc0";
+      linux,default-trigger = "none";
     };          
   };
 
@@ -348,13 +348,6 @@
   status = "okay";
 };
 
-/*sdcard on mmc1*/
-&usdhc2 {
-  status = "okay";
-  pinctrl-names = "default";
-  pinctrl-0 = <&pinctrl_usdhc2>;
-};  
-
 /*wilink module on mmc0*/
 &usdhc1 {
   status = "okay";
@@ -364,6 +357,7 @@
   pinctrl-0 = <&usdhc1_pins_default &wlan_pins_default>;
   pinctrl-1 = <&usdhc1_pins_sleep &wlan_pins_sleep>;
   ti,non-removable;
+  wifi-host;
   ti,needs-special-hs-handling;
   cap-power-off-card;
   keep-power-in-suspend;
@@ -377,7 +371,14 @@
     interrupts = <4 0x1>; 
   };
 };
-  
+
+/*sdcard on mmc1*/
+&usdhc2 {
+  status = "okay";
+  pinctrl-names = "default";
+  pinctrl-0 = <&pinctrl_usdhc2>;
+};
+
 &iomuxc {
   pinctrl-names = "default";
   imx6ul-evk {
@@ -427,7 +428,7 @@
       fsl,pins = <
         MX6UL_PAD_ENET1_TX_DATA1__GPIO2_IO04     0x00001030   /* wlan_iqr */
         MX6UL_PAD_NAND_DATA07__GPIO4_IO09        0x00001030   /* wlan_en*/
-      MX6UL_PAD_NAND_ALE__GPIO4_IO10             0x00001030   /* bt_en*/
+        MX6UL_PAD_NAND_ALE__GPIO4_IO10           0x00001030   /* bt_en*/
         >;
     };
 
@@ -604,8 +605,8 @@
     pinctrl_uart5:
     uart5grp {
       fsl,pins = <
-        MX6UL_PAD_UART5_TX_DATA__UART5_DCE_TX    0x000010B0
-        MX6UL_PAD_GPIO1_IO05__UART5_DCE_RX       0x000010B0
+        MX6UL_PAD_UART5_TX_DATA__UART5_DCE_TX    0x000010B0    /* TX From IMX */
+        MX6UL_PAD_GPIO1_IO05__UART5_DCE_RX       0x000010B0    /* RX to IMX */
       >;
     };
 
